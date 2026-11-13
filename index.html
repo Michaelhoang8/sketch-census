@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Sketch Census — a little memory goes a long way</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/">sketch census<span>SC / 061</span></a
+      ><span>SMALL MEMORY, BIG PICTURE</span>
+    </header>
+    <main>
+      <section class="top">
+        <div>
+          <p class="eyebrow">PROBABILISTIC STREAM ANALYTICS</p>
+          <h1>Count less.<br />Know <em>enough.</em></h1>
+        </div>
+        <p class="intro">
+          Thousands of keys. A handful of registers. Explore how a HyperLogLog
+          sketch remembers a crowd without keeping its names.
+        </p>
+      </section>
+      <div class="controls">
+        <label
+          >Precision
+          <select id="precision" aria-label="Precision">
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option selected>10</option>
+            <option>11</option>
+            <option>12</option>
+            <option>13</option>
+            <option>14</option>
+          </select></label
+        ><button id="compute">Build & merge ↗</button
+        ><button id="sample" class="quiet">Reset example</button
+        ><span id="notice" role="status">Preparing the example…</span>
+      </div>
+      <section class="result">
+        <div class="number">
+          <p class="eyebrow">LAST COMPUTED UNION ESTIMATE</p>
+          <div id="estimate">—</div>
+          <p id="explanation">Building a compact picture of two datasets.</p>
+        </div>
+        <div class="facts">
+          <div>
+            <strong id="memory">—</strong><span>register bytes per sketch</span>
+          </div>
+          <div>
+            <strong id="scale">—</strong
+            ><span>typical relative error scale*</span>
+          </div>
+          <div>
+            <strong id="overlap">—</strong><span>exact overlapping keys</span>
+          </div>
+        </div>
+      </section>
+      <section class="analysis">
+        <div class="section-head">
+          <h2>The shape of memory</h2>
+          <label
+            >Inspect
+            <select id="inspect">
+              <option value="union">Merged union</option>
+              <option value="a">Dataset A</option>
+              <option value="b">Dataset B</option>
+            </select></label
+          >
+        </div>
+        <svg
+          id="histogram"
+          viewBox="0 0 1000 220"
+          role="img"
+          aria-label="Register rank histogram"
+        ></svg>
+        <p class="caption">REGISTER RANK → <span id="method"></span></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>Estimate</th>
+              <th>Exact distinct</th>
+              <th>Observed error</th>
+            </tr>
+          </thead>
+          <tbody id="comparison"></tbody>
+        </table>
+        <div class="exports">
+          <button id="export" class="quiet" disabled>
+            Export inspected sketch ↓</button
+          ><button id="evidence" class="quiet" disabled>
+            Export comparison ↓</button
+          ><span
+            >*Approximate asymptotic standard error, not a guarantee or
+            confidence interval.</span
+          >
+        </div>
+      </section>
+      <details>
+        <summary>
+          The source material <span>TWO DATASETS / ONE UNION</span>
+        </summary>
+        <div class="inputs">
+          <label
+            >Dataset A · one key per line<textarea
+              id="a"
+              rows="10"
+              spellcheck="false"
+            ></textarea>
+          </label>
+          <div>
+            <label
+              >Dataset B · one key per line<textarea
+                id="b"
+                rows="10"
+                spellcheck="false"
+              ></textarea></label
+            ><button id="import" class="quiet">
+              Use a saved sketch for B ↑</button
+            ><input
+              id="file"
+              type="file"
+              accept="application/json,.json"
+              hidden
+            />
+            <p id="import-state">
+              Both datasets have an exact reference. Empty lines are ignored;
+              spaces and Unicode normalization are preserved.
+            </p>
+          </div>
+        </div>
+      </details>
+      <footer>
+        <p>
+          A sketch can estimate a union, but cannot enumerate keys, answer
+          membership queries, or subtract a dataset. Exported sketches are not
+          anonymization.
+        </p>
+        <span>SHA-256 / 64-BIT HASHES / LOCAL WORKER</span>
+      </footer>
+    </main>
+  </body>
+</html>
