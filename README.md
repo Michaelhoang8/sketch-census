@@ -14,6 +14,8 @@ Open http://127.0.0.1:8000. Python 3.10+ serves static assets; computation runs 
 
 The default example contains `visitor-0` through `visitor-2999` in A and `visitor-2000` through `visitor-5999` in B. At precision 10, each sketch has 1,024 register bytes. The merged estimate is 6,070.7021 versus exactly 6,000 distinct keys: +1.18% observed error. The overlapping 1,000 keys contribute to both inputs but are naturally deduplicated in the union.
 
+The register heatmap displays every stored rank, with darker cells for higher ranks (6 and above share the darkest color). Select a cell or use the register index field to read its exact rank. Dataset selection updates both the array and histogram. The union estimate and reference counts remain separate from the inspected dataset. Bar growth and map fades respect reduced-motion preferences. Raw inputs open in an editing dialog.
+
 ## Features
 
 - SHA-256 hashing, 64-bit bucket/rank extraction, harmonic estimation, small-cardinality linear counting, and an explicit saturation result.

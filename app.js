@@ -11,10 +11,12 @@ const count = (n) =>
 function notice(text, error = false) {
   $("notice").textContent = text;
   $("notice").className = error ? "error" : "";
+  $("edit-notice").textContent = text;
+  $("edit-notice").className = error ? "error" : "";
 }
 function controls() {
   document
-    .querySelectorAll("button,select,textarea")
+    .querySelectorAll("button,select,textarea,input")
     .forEach((e) => (e.disabled = busy));
   $("b").disabled = busy || !!imported;
   $("precision").disabled = busy || !!imported;
@@ -57,9 +59,80 @@ function svgElement(tag, attributes, text) {
   if (text !== undefined) e.textContent = text;
   return e;
 }
+const rankColors = [
+  "#f2e8db",
+  "#f0ccaa",
+  "#e8a774",
+  "#d77b49",
+  "#b75130",
+  "#84351f",
+  "#4b261b",
+];
+function drawRegisters() {
+  if (!result) return;
+  const registers = result.sketches[$("inspect").value].registers;
+  const canvas = $("register-map"),
+    ctx = canvas.getContext("2d");
+  const cols = 2 ** Math.ceil(Math.log2(registers.length) / 2);
+  const rows = registers.length / cols;
+  canvas.height = (canvas.width * rows) / cols;
+  const size = canvas.width / cols,
+    gap = Math.min(3, size * 0.12);
+  const requested = Number($("register-index").value);
+  const selected = Number.isInteger(requested)
+    ? Math.max(0, Math.min(registers.length - 1, requested))
+    : 0;
+  $("register-index").max = registers.length - 1;
+  $("register-index").value = selected;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  registers.forEach((rank, i) => {
+    ctx.fillStyle = rankColors[Math.min(rank, 6)];
+    ctx.fillRect(
+      (i % cols) * size + gap / 2,
+      Math.floor(i / cols) * size + gap / 2,
+      size - gap,
+      size - gap,
+    );
+  });
+  ctx.strokeStyle = "#1d1613";
+  ctx.lineWidth = Math.max(1.5, size * 0.08);
+  ctx.strokeRect(
+    (selected % cols) * size + gap / 2,
+    Math.floor(selected / cols) * size + gap / 2,
+    size - gap,
+    size - gap,
+  );
+  $("register-value").textContent =
+    `Rank ${registers[selected]} · ${registers.length.toLocaleString()} registers`;
+  canvas.setAttribute(
+    "aria-label",
+    `${$("inspect").selectedOptions[0].textContent} register array. ${registers.length} registers, arranged in ${rows} rows of ${cols}. Register ${selected} has rank ${registers[selected]}. Use the register index control to inspect values.`,
+  );
+}
+$("register-index").oninput = drawRegisters;
+$("register-map").onclick = (e) => {
+  if (!result || busy) return;
+  const registers = result.sketches[$("inspect").value].registers;
+  const cols = 2 ** Math.ceil(Math.log2(registers.length) / 2),
+    rows = registers.length / cols;
+  const bounds = e.currentTarget.getBoundingClientRect();
+  const col = Math.min(
+    cols - 1,
+    Math.max(0, Math.floor(((e.clientX - bounds.left) / bounds.width) * cols)),
+  );
+  const row = Math.min(
+    rows - 1,
+    Math.max(0, Math.floor(((e.clientY - bounds.top) / bounds.height) * rows)),
+  );
+  $("register-index").value = row * cols + col;
+  drawRegisters();
+};
+$("edit-open").onclick = () => $("edit-dialog").showModal();
+$("edit-close").onclick = () => $("edit-dialog").close();
 function inspect() {
   if (!result) return;
   const stats = result[$("inspect").value];
+  drawRegisters();
   $("method").textContent =
     `${stats.method.toUpperCase()} · ${stats.zeros} EMPTY REGISTERS`;
   const svg = $("histogram");
@@ -110,6 +183,11 @@ function inspect() {
 }
 function render() {
   const s = result.union;
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    $("register-map").animate([{ opacity: 0.3 }, { opacity: 1 }], {
+      duration: 400,
+      easing: "ease-out",
+    });
   $("estimate").textContent =
     s.estimate === null ? "Saturated" : count(s.estimate);
   $("memory").textContent = count(s.bytes);

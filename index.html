@@ -3,26 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Sketch Census — a little memory goes a long way</title>
+    <title>Sketch Census</title>
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
   </head>
   <body>
     <header>
-      <a href="/">sketch census<span>SC / 061</span></a
-      ><span>SMALL MEMORY, BIG PICTURE</span>
+      <h1>Sketch Census</h1>
+      <button id="edit-open" class="quiet">Edit datasets</button>
     </header>
     <main>
-      <section class="top">
-        <div>
-          <p class="eyebrow">PROBABILISTIC STREAM ANALYTICS</p>
-          <h1>Count less.<br />Know <em>enough.</em></h1>
-        </div>
-        <p class="intro">
-          Thousands of keys. A handful of registers. Explore how a HyperLogLog
-          sketch remembers a crowd without keeping its names.
-        </p>
-      </section>
       <div class="controls">
         <label
           >Precision
@@ -39,41 +29,73 @@
             <option>13</option>
             <option>14</option>
           </select></label
-        ><button id="compute">Build & merge ↗</button
+        ><button id="compute">Build &amp; merge</button
         ><button id="sample" class="quiet">Reset example</button
         ><span id="notice" role="status">Preparing the example…</span>
       </div>
-      <section class="result">
-        <div class="number">
-          <p class="eyebrow">LAST COMPUTED UNION ESTIMATE</p>
-          <div id="estimate">—</div>
-          <p id="explanation">Building a compact picture of two datasets.</p>
-        </div>
-        <div class="facts">
-          <div>
-            <strong id="memory">—</strong><span>register bytes per sketch</span>
+      <div class="overview">
+        <section class="result">
+          <div class="number">
+            <p class="eyebrow">LAST COMPUTED UNION ESTIMATE</p>
+            <div id="estimate">—</div>
+            <p id="explanation">Computing union estimate.</p>
           </div>
-          <div>
-            <strong id="scale">—</strong
-            ><span>typical relative error scale*</span>
+          <div class="facts">
+            <div>
+              <strong id="memory">—</strong
+              ><span>register bytes per sketch</span>
+            </div>
+            <div>
+              <strong id="scale">—</strong
+              ><span>typical relative error scale*</span>
+            </div>
+            <div>
+              <strong id="overlap">—</strong><span>exact overlapping keys</span>
+            </div>
           </div>
-          <div>
-            <strong id="overlap">—</strong><span>exact overlapping keys</span>
+        </section>
+        <section class="register-section">
+          <div class="section-head">
+            <h2>Register array</h2>
+            <label
+              >Inspect
+              <select id="inspect">
+                <option value="union">Merged union</option>
+                <option value="a">Dataset A</option>
+                <option value="b">Dataset B</option>
+              </select></label
+            >
           </div>
-        </div>
-      </section>
+          <canvas
+            id="register-map"
+            width="768"
+            height="768"
+            role="img"
+            aria-label="Register ranks"
+          ></canvas>
+          <div class="map-legend">
+            <span>Rank</span><i class="r0"></i>0<i class="r1"></i>1<i
+              class="r2"
+            ></i
+            >2<i class="r3"></i>3<i class="r4"></i>4<i class="r5"></i>5<i
+              class="r6"
+            ></i
+            >6+
+          </div>
+          <div class="register-inspector">
+            <label
+              >Register index<input
+                id="register-index"
+                type="number"
+                min="0"
+                step="1"
+                value="0" /></label
+            ><output id="register-value" for="register-index"></output>
+          </div>
+        </section>
+      </div>
       <section class="analysis">
-        <div class="section-head">
-          <h2>The shape of memory</h2>
-          <label
-            >Inspect
-            <select id="inspect">
-              <option value="union">Merged union</option>
-              <option value="a">Dataset A</option>
-              <option value="b">Dataset B</option>
-            </select></label
-          >
-        </div>
+        <div class="section-head"><h2>Rank distribution</h2></div>
         <svg
           id="histogram"
           viewBox="0 0 1000 220"
@@ -103,10 +125,12 @@
           >
         </div>
       </section>
-      <details>
-        <summary>
-          The source material <span>TWO DATASETS / ONE UNION</span>
-        </summary>
+      <dialog id="edit-dialog" aria-labelledby="edit-title">
+        <div class="section-head">
+          <h2 id="edit-title">Datasets</h2>
+          <button id="edit-close" class="quiet">Close</button>
+        </div>
+        <p id="edit-notice" role="status"></p>
         <div class="inputs">
           <label
             >Dataset A · one key per line<textarea
@@ -136,14 +160,13 @@
             </p>
           </div>
         </div>
-      </details>
+      </dialog>
       <footer>
         <p>
           A sketch can estimate a union, but cannot enumerate keys, answer
           membership queries, or subtract a dataset. Exported sketches are not
           anonymization.
         </p>
-        <span>SHA-256 / 64-BIT HASHES / LOCAL WORKER</span>
       </footer>
     </main>
   </body>
